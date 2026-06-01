@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Backend deployment
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        working-directory: ./backend
+        run: |
+          # Add your test commands here
+          echo "Running tests..."
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          HUGGING_FACE_API_KEY: ${{ secrets.HUGGING_FACE_API_KEY }}
+
+      # Frontend deployment (optional - for static hosting)
+      - name: Install and build frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+
+      # Note: For Render deployment, set environment variables in Render Dashboard
+      # Go to: Render Dashboard → Your Service → Environment
+      # Add the same variables listed below in the "env:" section
+
